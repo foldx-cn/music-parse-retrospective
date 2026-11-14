@@ -107,6 +107,7 @@
 
 这篇文章的完整版本和配图会同步到 GitHub，仓库里只保留复盘文档和架构说明，不包含具体实现，也不提供 APK 下载：
 
+**软件站点:** https://dl.foldx.cn/  
 **GitHub:** https://github.com/foldx-cn/music-parse-retrospective
 
 ---
