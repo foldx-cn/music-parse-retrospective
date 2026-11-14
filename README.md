@@ -136,7 +136,7 @@ POST /api/netdisk/file    { shareId, stoken, fid, fidToken, name }
 
 下载中心的平台识别、下载任务管理、分片续传和登录入口的信息架构，参考了 **CYQawa/YunX**：<https://github.com/CYQawa/YunX>。YunX 以 AGPL-3.0 开源，感谢作者 CYQawa 把这样一套完整的实现放在公开仓库里；没有它，这次适配不会这么快落地。
 
-《音乐解析》只借鉴交互与行为，不复制 YunX 的源码；新增功能在下载页和更新日志里都标注了来源。谢谢开源。
+《音乐解析》的下载中心参考并适配了 YunX 的公开实现；YunX 以 AGPL-3.0 开源，具体源码与授权请以原仓库为准。新增功能在下载页和更新日志里都标注了来源。谢谢开源。
 
 ---
 
