@@ -15,6 +15,8 @@
 - 登录文件换成和 **YunX** 同格式的 `.yunx`：`YUNX_AUTH_V2` 头部、PBKDF2-HMAC-SHA256 210000 次、AES-256-GCM；兼容旧版 V1 的 10000 次迭代。
 - 账号备份 schema 对齐 YunX：视频平台写成 `video:BILIBILI`、`video:XHS`、`video:DOUYIN`、`video:KUAISHOU`、`video:WEIBO`、`video:ACFUN`、`video:PIXIV`，字段包含 `id / cookie / nickname / isPrimary / remark / updatedAt`；网盘与 token 类平台保留各自字段。
 - 下载任务支持每个任务单独携带 `Referer / User-Agent / Cookie / Origin`，B 站、Pixiv 等必须带来源的直链不会再直接 403。
+- AcFun 的 m3u8 现在会解析主列表、逐段下载并合并成 `.ts`；AES 加密的 HLS 会明确报错，不会假装成功。
+- 抖音 / 小红书 / 快手在纯 HTTP 拿不到 SSR 数据时，会尝试 App 内的隐藏 WebView 跑一遍页面再交给解析器；这条路线还需要真机逐一验证。
 - 图标换成蓝发耳机少女（方案一），桌面图标和网页 header 同步替换；名字继续用「折析」。
 
 ## 账号与登录
@@ -30,12 +32,12 @@
 | 平台 | 状态 | 说明 |
 | --- | --- | --- |
 | B 站 | 已实测 | 返回单文件 mp4，标题、作者、封面、大小都能拿到 |
-| AcFun | 已实测 | 返回 m3u8；目前保存播放列表，HLS 分片合并还没做 |
+| AcFun | 已实测 | 返回 m3u8，已逐段下载并合并为 .ts；AES 加密 HLS 暂不支持 |
 | 微博 | 已实现 | 需要登录 Cookie 才能稳定拿到视频 / 九宫格原图 |
 | Pixiv | 已实现 | 需要登录 Cookie；原图必须带 Pixiv Referer |
-| 快手 | 已实现 | 依赖页面 `INIT_STATE`，有风控风险 |
-| 小红书 | 已实现 | 有登录墙，建议先登录；部分图片带水印 |
-| 抖音 | 已实现 | 依赖 SSR 数据，抗风控能力弱 |
+| 快手 | 已实现 | 依赖页面 `INIT_STATE`，HTTP 失败时走隐藏 WebView 兜底 |
+| 小红书 | 已实现 | 有登录墙，建议先登录；HTTP 失败时走隐藏 WebView 兜底 |
+| 抖音 | 已实现 | SSR / RENDER_DATA，HTTP 失败时走隐藏 WebView 兜底 |
 
 解析器、平台枚举和登录备份字段映射参考了 YunX 的实现；只处理公开可访问的页面，不碰登录态里的私有列表。平台改版或风控时，接口会返回失败原因，而不是假装成功。
 
@@ -60,8 +62,8 @@
 ## 没做好的地方
 
 - **平台解析还窄**：只有 B 站、AcFun 实测通过；微博、Pixiv、快手、小红书、抖音还需要登录 Cookie 和更多真实链接验证。
-- **AcFun 的 HLS 没合并**：目前只保存 m3u8 播放列表，没有把分片合成可播放视频。
-- **隐藏 WebView 路线没接**：抖音、小红书、快手目前只有公开 HTTP 解析，抗风控能力弱。
+- **AES 加密 HLS 没处理**：AcFun 这种明文 HLS 已经能合并；带 AES-128 的播放列表会明确失败。
+- **隐藏 WebView 还没真机验证**：抖音、小红书、快手已接兜底，但需要登录 Cookie 和真实链接继续测。
 - **真机覆盖不足**：应用内登录、Cookie 回填和 `saveText` 只做过编译和页面验证，真机矩阵还不够。
 - **账号 token 类平台**：123、迅雷等 token 字段只在导入 / 导出时保留，WebView 登录仍以 Cookie 为主，跨 YunX 恢复 token 类账号可能失败。
 
